@@ -198,6 +198,25 @@
   }
   .cmd .p{ color:var(--fg-bright); }
   .cmd .file{ color:var(--fg); }
+  .cmd-cursor{
+    display:inline-block;
+    width:7px; height:13px;
+    background:var(--fg);
+    vertical-align:-2px;
+    margin-left:2px;
+    animation:blink 1s steps(1) infinite;
+  }
+
+  /* ---------- scroll reveal ---------- */
+  .section-body{
+    opacity:0;
+    transform:translateY(10px);
+    transition:opacity 0.5s ease, transform 0.5s ease;
+  }
+  .section-body.revealed{
+    opacity:1;
+    transform:translateY(0);
+  }
 
   h1,h2{
     font-family:var(--disp);
@@ -408,16 +427,19 @@
 
   <section id="about">
     <div class="cmd"><span class="p">judah@arpha11</span>:~$ cat <span class="file">about.txt</span></div>
+    <div class="section-body">
     <h2>ARPHA11</h2>
     <p><strong>ARPHA11</strong> is an independent software company founded and operated by <strong>Judah Bolagh</strong>, a young software developer with a simple goal: build software, experiment with technology, and make money doing it.</p>
     <p>ARPHA11 exists to create software without being locked into a single philosophy. Some projects are built to be completely free and open source. Others are developed as proprietary, closed-source products. Both approaches have a place &mdash; developers should be free to choose the model that fits a given project.</p>
     <p>At its core, ARPHA11 is about <strong>building things</strong> &mdash; a small command-line utility, a developer tool, an operating-system component, a game, a programming language, a productivity application, or a larger commercial product. It is meant to be a place where ideas become working software.</p>
+    </div>
   </section>
 
   <hr class="rule">
 
   <section id="arphaxad">
     <div class="cmd"><span class="p">judah@arpha11</span>:~$ cat <span class="file">arphaxad.txt</span></div>
+    <div class="section-body">
     <h2>The ARPHAXAD Structure</h2>
     <p class="dim">ARPHA11 operates under a broader project structure known as <strong>ARPHAXAD</strong>, divided into two primary branches.</p>
 
@@ -435,12 +457,14 @@
         <p>A space to experiment publicly, share knowledge, and build tools that can evolve beyond their original creator &mdash; not every OPS project needs to become a major product.</p>
       </div>
     </div>
+    </div>
   </section>
 
   <hr class="rule">
 
   <section id="founder">
     <div class="cmd"><span class="p">judah@arpha11</span>:~$ whoami</div>
+    <div class="section-body">
     <h2>A One-Person Software Company</h2>
     <p>Unlike a large technology corporation, ARPHA11 is operated by a single developer: <strong>Judah Bolagh</strong> &mdash; interested in creating software across different areas of computing. There is no engineering department, corporate hierarchy, or development team behind it.</p>
     <ul class="plain">
@@ -451,24 +475,28 @@
     </ul>
     <p>Being a one-person company means ARPHA11 can experiment with ideas that might never survive inside a conventional corporate environment &mdash; started because they're interesting, changed when something better is discovered, abandoned when they stop being useful.</p>
     <p class="dim">The company is intentionally small. The ambition, however, does not have to be.</p>
+    </div>
   </section>
 
   <hr class="rule">
 
   <section id="philosophy">
     <div class="cmd"><span class="p">judah@arpha11</span>:~$ cat <span class="file">philosophy.txt</span></div>
+    <div class="section-body">
     <h2>The ARPHA11 Philosophy</h2>
 
     <blockquote>Build software. Not every idea needs to become a billion-dollar startup &mdash; sometimes the best reason to create something is that it would be useful, interesting, challenging, or fun.</blockquote>
     <blockquote>Learn by building. Every project is a chance to learn something new about programming, operating systems, interfaces, architecture, networking, or whatever the project requires.</blockquote>
     <blockquote>Open source when it makes sense &mdash; and proprietary when it makes sense. Open source and proprietary software are tools, not religions.</blockquote>
     <blockquote>Make money. If a project is valuable enough for people to pay for, ARPHA11 should be able to sell it &mdash; funding future projects and letting Judah spend more time doing what he actually wants to do: make software.</blockquote>
+    </div>
   </section>
 
   <hr class="rule">
 
   <section id="builds">
     <div class="cmd"><span class="p">judah@arpha11</span>:~$ ls -la <span class="file">builds/</span></div>
+    <div class="section-body">
     <h2>What ARPHA11 Builds</h2>
     <p class="dim">Low-level, close-to-the-machine software &mdash; the layer most people never see.</p>
     <dl class="buildgrid">
@@ -504,12 +532,14 @@
         <dt>license</dt><dd>BSD License</dd>
       </div>
     </div>
+    </div>
   </section>
 
   <hr class="rule">
 
   <section id="manifesto">
     <div class="cmd"><span class="p">judah@arpha11</span>:~$ cat <span class="file">manifesto.txt</span></div>
+    <div class="section-body">
     <h2 style="text-align:center;">ARPHA11</h2>
     <div class="kv">
       <dt>founder</dt><dd>Judah Bolagh</dd>
@@ -522,6 +552,7 @@
 
     <div class="manifesto">
       <div class="big">Make software.<br>Share software.<br>Sell software.<br>Keep building.</div>
+    </div>
     </div>
   </section>
 
@@ -571,6 +602,7 @@
     main.style.opacity = '1';
     setTimeout(function(){ boot.remove(); }, 450);
     typeHero();
+    initScrollTyping();
   }
 
   var heroText = "> https://github.com/ARPHAXAD-OPS-OFFICIAL";
@@ -584,6 +616,77 @@
         setTimeout(step, 18);
       }
     })();
+  }
+
+  function initScrollTyping(){
+    var cmds = document.querySelectorAll('.cmd');
+
+    function typeCmd(cmdEl, onDone){
+      // Walk the DOM in order, collecting every text node so styled
+      // spans (the prompt, the filename) type out in the right color.
+      var textNodes = [];
+      (function walk(node){
+        for (var n = node.firstChild; n; n = n.nextSibling){
+          if (n.nodeType === 3){ textNodes.push(n); }
+          else if (n.nodeType === 1){ walk(n); }
+        }
+      })(cmdEl);
+
+      var originals = textNodes.map(function(n){ return n.nodeValue; });
+      textNodes.forEach(function(n){ n.nodeValue = ''; });
+
+      var cursor = document.createElement('span');
+      cursor.className = 'cmd-cursor';
+      cmdEl.appendChild(cursor);
+
+      var ni = 0, ci = 0;
+
+      function tick(){
+        if (ni >= textNodes.length){
+          cursor.remove();
+          onDone();
+          return;
+        }
+        var full = originals[ni];
+        if (ci >= full.length){
+          ni++; ci = 0;
+          tick();
+          return;
+        }
+        ci++;
+        textNodes[ni].nodeValue = full.slice(0, ci);
+        setTimeout(tick, 14 + Math.random() * 20);
+      }
+      tick();
+    }
+
+    var seen = new WeakSet();
+
+    function revealSection(cmdEl){
+      if (seen.has(cmdEl)) return;
+      seen.add(cmdEl);
+      var section = cmdEl.closest('section');
+      var body = section ? section.querySelector('.section-body') : null;
+      typeCmd(cmdEl, function(){
+        if (body){ body.classList.add('revealed'); }
+      });
+    }
+
+    if ('IntersectionObserver' in window){
+      var observer = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if (entry.isIntersecting){
+            revealSection(entry.target);
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { rootMargin: '0px 0px -15% 0px', threshold: 0.15 });
+
+      cmds.forEach(function(cmdEl){ observer.observe(cmdEl); });
+    } else {
+      // fallback: just reveal everything immediately
+      cmds.forEach(function(cmdEl){ revealSection(cmdEl); });
+    }
   }
 
   typeBoot();
